@@ -1,0 +1,39 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-c",
+      "-mcpu=cortex-m0",
+      "-mthumb",
+      "-DSTM32F051x8",
+      "-DUSE_FULL_LL_DRIVER",
+      "-DHSE_VALUE=8000000",
+      "-DHSE_STARTUP_TIMEOUT=100",
+      "-DLSE_STARTUP_TIMEOUT=5000",
+      "-DLSE_VALUE=32768",
+      "-DHSI_VALUE=8000000",
+      "-DLSI_VALUE=40000",
+      "-DVDD_VALUE=3300",
+      "-DPREFETCH_ENABLE=1",
+      "-DINSTRUCTION_CACHE_ENABLE=0",
+      "-DDATA_CACHE_ENABLE=0",
+      "-ICore/Inc",
+      "-IDrivers/STM32F0xx_HAL_Driver/Inc",
+      "-IDrivers/CMSIS/Device/ST/STM32F0xx/Include",
+      "-IDrivers/CMSIS/Include",
+      "-Og",
+      "-Wall",
+      "-fdata-sections",
+      "-ffunction-sections",
+      "-g",
+      "-gdwarf-2",
+      "-Wa,-a,-ad,-alms=build/main.lst",
+      "-o",
+      "build/main.o",
+      "Core/Src/main.c"
+    ],
+    "directory": "/home/rayquaza/Heathcliff/EEE3096S/EEE3096S-2024/Prac1",
+    "file": "/home/rayquaza/Heathcliff/EEE3096S/EEE3096S-2024/Prac1/Core/Src/main.c",
+    "output": "/home/rayquaza/Heathcliff/EEE3096S/EEE3096S-2024/Prac1/build/main.o"
+  }
+]
