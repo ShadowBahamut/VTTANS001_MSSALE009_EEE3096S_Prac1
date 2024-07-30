@@ -19,11 +19,15 @@
 /* Includes
  * ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f051x8.h"
+#include "stm32f0xx.h"
+#include "stm32f0xx_hal.h"
+#include "stm32f0xx_hal_gpio.h"
+#include <lcd_stm32f0.c>␍
 
 /* Private includes
  * ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <lcd_stm32f0.c>␍
 #include <stdint.h>
 
 /* USER CODE END Includes */
@@ -37,6 +41,8 @@
 /* Private define
  * ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define DELAY 1000
+#define GPIO_PIN GPIO
 /* USER CODE END PD */
 
 /* Private macro
@@ -48,8 +54,9 @@
 /* Private variables
  * ---------------------------------------------------------*/
 TIM_HandleTypeDef htim16;
-
 /* USER CODE BEGIN PV */
+uint8_t led_val = 0;
+uint32_t led_pattern_0 = 0b00000000000000000000000000000100;
 // TODO: Define input variables
 
 /* USER CODE END PV */
@@ -61,6 +68,16 @@ static void MX_GPIO_Init (void);
 static void MX_TIM16_Init (void);
 /* USER CODE BEGIN PFP */
 void TIM16_IRQHandler (void);
+void PATTERN_1 (void);
+void PATTERN_2 (void);
+void PATTERN_3 (void);
+void PATTERN_4 (void);
+void PATTERN_5 (void);
+void PATTERN_6 (void);
+void PATTERN_7 (void);
+void PATTERN_8 (void);
+void PATTERN_9 (void);
+
 /* USER CODE END PFP */
 
 /* Private user code
@@ -112,6 +129,24 @@ main (void)
   /* USER CODE BEGIN WHILE */
   while (1)
     {
+      PATTERN_1 ();
+      HAL_Delay (DELAY);
+      PATTERN_2 ();
+      HAL_Delay (DELAY);
+      PATTERN_3 ();
+      HAL_Delay (DELAY);
+      PATTERN_4 ();
+      HAL_Delay (DELAY);
+      PATTERN_5 ();
+      HAL_Delay (DELAY);
+      PATTERN_6 ();
+      HAL_Delay (DELAY);
+      PATTERN_7 ();
+      HAL_Delay (DELAY);
+      PATTERN_8 ();
+      HAL_Delay (DELAY);
+      PATTERN_9 ();
+      HAL_Delay (DELAY);
       /* USER CODE END WHILE */
 
       /* USER CODE BEGIN 3 */
@@ -338,6 +373,123 @@ TIM16_IRQHandler (void)
 
   // TODO: Change LED pattern
   // print something
+}
+
+void
+PATTERN_1 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)SET);
+}
+
+void
+PATTERN_2 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_3 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_4 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_5 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_6 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_7 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_8 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)SET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
+}
+
+void
+PATTERN_9 ()
+{
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED0_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED1_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED2_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED3_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED4_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED5_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
+  HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
 }
 
 /* USER CODE END 4 */
