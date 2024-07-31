@@ -19,11 +19,12 @@
 /* Includes
  * ------------------------------------------------------------------*/
 #include "main.h"
+#include "lcd_stm32f0.h"
 #include "stm32f051x8.h"
 #include "stm32f0xx.h"
 #include "stm32f0xx_hal.h"
 #include "stm32f0xx_hal_gpio.h"
-#include <lcd_stm32f0.c>␍
+#include <lcd_stm32f0.c>
 
 /* Private includes
  * ----------------------------------------------------------*/
@@ -41,8 +42,7 @@
 /* Private define
  * ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DELAY 1000
-#define GPIO_PIN GPIO
+uint16_t DELAY = 1000;
 /* USER CODE END PD */
 
 /* Private macro
@@ -55,8 +55,6 @@
  * ---------------------------------------------------------*/
 TIM_HandleTypeDef htim16;
 /* USER CODE BEGIN PV */
-uint8_t led_val = 0;
-uint32_t led_pattern_0 = 0b00000000000000000000000000000100;
 // TODO: Define input variables
 
 /* USER CODE END PV */
@@ -66,6 +64,7 @@ uint32_t led_pattern_0 = 0b00000000000000000000000000000100;
 void SystemClock_Config (void);
 static void MX_GPIO_Init (void);
 static void MX_TIM16_Init (void);
+static void IT_INIT (void);
 /* USER CODE BEGIN PFP */
 void TIM16_IRQHandler (void);
 void PATTERN_1 (void);
@@ -116,9 +115,10 @@ main (void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init ();
   MX_TIM16_Init ();
+  IT_INIT ();
   init_LCD ();
   lcd_command (CLEAR);
-  lcd_putstring ("testing");
+  lcd_putstring ("Uploaded-0");
   /* USER CODE BEGIN 2 */
 
   // TODO: Start timer TIM16
@@ -271,10 +271,10 @@ MX_GPIO_Init (void)
   LL_GPIO_Init (Button0_GPIO_Port, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = Button1_Pin;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-  LL_GPIO_Init (Button1_GPIO_Port, &GPIO_InitStruct);
+  // GPIO_InitStruct.Pin = Button1_Pin;
+  // GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+  // GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  // LL_GPIO_Init (Button1_GPIO_Port, &GPIO_InitStruct);
 
   /**/
   GPIO_InitStruct.Pin = Button2_Pin;
@@ -283,10 +283,10 @@ MX_GPIO_Init (void)
   LL_GPIO_Init (Button2_GPIO_Port, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = Button3_Pin;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-  LL_GPIO_Init (Button3_GPIO_Port, &GPIO_InitStruct);
+  /*GPIO_InitStruct.Pin = Button3_Pin;*/
+  /*GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;*/
+  /*GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;*/
+  /*LL_GPIO_Init (Button3_GPIO_Port, &GPIO_InitStruct);*/
 
   /**/
   GPIO_InitStruct.Pin = LED0_Pin;
@@ -491,6 +491,47 @@ PATTERN_9 ()
   HAL_GPIO_WritePin (LED0_GPIO_Port, LED6_Pin, (GPIO_PinState)RESET);
   HAL_GPIO_WritePin (LED0_GPIO_Port, LED7_Pin, (GPIO_PinState)RESET);
 }
+
+void
+IT_INIT (void)
+{
+  RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+  GPIOA->MODER &= ~(GPIO_MODER_MODER3);
+  GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR3);
+  GPIOA->PUPDR |= GPIO_PUPDR_PUPDR3_0;
+  // Enable EXTICR[0]
+  SYSCFG->EXTICR[0] &= ~(SYSCFG_EXTICR1_EXTI3);
+  SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PA;
+
+  EXTI->RTSR |= EXTI_RTSR_TR3;
+  EXTI->IMR |= EXTI_IMR_MR3;
+  // Setup NVIC
+  NVIC_SetPriority (EXTI2_3_IRQn, 1);
+  NVIC_EnableIRQ (EXTI2_3_IRQn);
+}
+
+void
+EXTI2_3_IRQHandler (void)
+{
+  if (EXTI->PR & EXTI_PR_PR3)
+    {
+      EXTI->PR |= EXTI_PR_PR3;
+      lcd_command (CLEAR);
+      lcd_putstring ("changed delay");
+      DELAY = 500;
+    }
+}
+
+/*void*/
+/*EXTI0_1_IRQHandler (void)*/
+/*{*/
+/*  if (EXTI->PR & EXTI_PR_PR1)*/
+/*    {*/
+/*      EXTI->PR |= EXTI_PR_PR1;*/
+/*      lcd_command (CLEAR);*/
+/*      lcd_putstring ("interrupt");*/
+/*    }*/
+/*}*/
 
 /* USER CODE END 4 */
 
