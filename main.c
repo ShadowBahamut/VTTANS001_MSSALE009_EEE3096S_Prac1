@@ -118,8 +118,17 @@ main (void)
   IT_INIT ();
   init_LCD ();
   lcd_command (CLEAR);
-
   lcd_putstring ("Uploaded-v0.2");
+
+  /* USER CODE BEGIN 2 */
+
+  // TODO: Start timer TIM16
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+
   MX_TIM16_Init();
   HAL_TIM_Base_Start_IT(&htim16);
 
@@ -161,6 +170,7 @@ SystemClock_Config (void)
       Error_Handler ();
     }
 }
+
 
 static void
 MX_TIM16_Init (void)
@@ -234,6 +244,12 @@ MX_GPIO_Init (void)
   GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
   LL_GPIO_Init (Button0_GPIO_Port, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = Button1_Pin;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  LL_GPIO_Init (Button1_GPIO_Port, &GPIO_InitStruct);
 
   /**/
   GPIO_InitStruct.Pin = Button2_Pin;
@@ -316,6 +332,7 @@ MX_GPIO_Init (void)
   GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init (GPIOB, &GPIO_InitStruct);
+}
 
 /* USER CODE BEGIN 4 */
 
@@ -554,6 +571,12 @@ EXTI2_3_IRQHandler (void)
 
 }
 
+/* USER CODE END 4 */
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void
 Error_Handler (void)
 {
