@@ -8,12 +8,16 @@
 // #include <stdio.h>
 #include "lcd_stm32f0.c"
 #include "stm32f0xx.h"
-/* USER CODE END Includes */
 
+
+/* USER CODE END Includes */
+#define NS 128          // Number of samples in LUT
+#define TIM2CLK 8000000 // STM Clock frequency
+#define F_SIGNAL 1000
 /* Private typedef
  * -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-void wave_change (uint8_t waveform);
+void change_wave (uint8_t waveform);
 /* USER CODE END PTD */
 
 /* Private define
@@ -54,9 +58,7 @@ uint32_t triangle_LUT[NS]
         371, 354, 338, 322, 306, 290, 274, 258, 242, 226, 209, 193,  177,
         161, 145, 129, 113, 97,  81,  64,  48,  32,  16,  0 };
 
-#define NS 128          // Number of samples in LUT
-#define TIM2CLK 8000000 // STM Clock frequency
-#define F_SIGNAL 1000
+
 // Frequency of output analog signal
 unsigned long debounceTicks = 0; // time since last press
 unsigned long debounceDuration
@@ -373,14 +375,14 @@ EXTI0_1_IRQHandler (void)
         {
           waveform = 0; // set back to Sine wave
         }
-      wave_change (waveform);
+      change_wave (waveform);
     }
   HAL_GPIO_EXTI_IRQHandler (Button0_Pin); // Clear interrupt flags
 
   HAL_GPIO_EXTI_IRQHandler (Button0_Pin); // Clear interrupt flags
 }
 void
-wave_change (uint8_t wavein)
+change_wave (uint8_t wavein)
 {
   __HAL_TIM_DISABLE_DMA (&htim2, TIM_DMA_CC1);
   HAL_DMA_Abort_IT (&hdma_tim2_ch1);
