@@ -5,15 +5,18 @@
 /* Private includes
  * ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-// #include <stdio.h>
 #include "lcd_stm32f0.c"
 #include "stm32f0xx.h"
+#include "stm32f0xx_hal.h"
+#include <stdint.h>
 
 
 /* USER CODE END Includes */
+
 #define NS 128          // Number of samples in LUT
 #define TIM2CLK 8000000 // STM Clock frequency
 #define F_SIGNAL 1000
+
 /* Private typedef
  * -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
@@ -157,6 +160,7 @@ main (void)
     }
 }
 
+void
 SystemClock_Config (void)
 {
   LL_FLASH_SetLatency (LL_FLASH_LATENCY_0);
