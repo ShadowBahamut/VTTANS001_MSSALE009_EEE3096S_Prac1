@@ -429,3 +429,182 @@ void TIM6_IRQHandler(void) {
   // Toggle LED7
   HAL_GPIO_TogglePin(GPIOB, LED7_Pin);
 }
+
+void TIM16_IRQHandler(void) {
+
+  // TODO: Initialise a string to output second line on L
+
+  // Acknowledge interrupt (check if necessary)
+  HAL_TIM_IRQHandler(&htim16);
+
+  // Safely read 8-bit value from EEPROM
+  EEPROM_Val = read_from_address(0b0000 + EEPROM_I);
+  if (EEPROM_I == 0) {
+    CatchError();
+  }
+    
+  // Check if the EEPROM value matches the expected value
+  else if (EEPROM_Val == StoredData[EEPROM_I]) {
+    // Print first line
+    // Set cursor to first row, first column
+
+    sprintf(lcd_output, "%d", EEPROM_Val);
+    writeLCD(lcd_output);
+
+  } else {
+    // In case of mismatch, display error message
+
+    writeLCD("SPI ERROR!");
+  }
+
+  // Increment index and wrap around (protect from out-of-bounds access)
+  EEPROM_I = (EEPROM_I + 1) % 6;
+}
+
+void writeLCD(char *char_in) {
+  for (volatile int i = 0; i < 3000; i++)
+    ; // Simple delay
+  init_LCD();
+  lcd_command(0x28); // Set LCD to two-line mode
+  lcd_putstring("EEPROM byte:");
+  lcd_command(0xC0); // Move to second line
+  lcd_putstring(char_in);
+}
+
+// Get ADC value
+uint32_t pollADC(void) {
+  HAL_ADC_Start(&hadc);                  // Start ADC
+  HAL_ADC_PollForConversion(&hadc, 100); // Wait for conversion to complete
+  uint32_t adc_value = HAL_ADC_GetValue(&hadc); // Read value
+  HAL_ADC_Stop(&hadc);                          // Stop ADC
+  return adc_value;
+}
+
+// Calculate PWM CCR value
+uint32_t ADCtoCCR(uint32_t val) {
+  uint32_t max_pwm = 47999;      // Maximum ARR value
+  return (val * max_pwm) / 4095; // Scale ADC value to CCR range
+}
+
+void ADC1_COMP_IRQHandler(void) {
+  HAL_ADC_IRQHandler(&hadc); // Handle ADC interrupt and clear flags
+}
+
+// Initialize SPI
+static void init_spi(void) {
+  RCC->AHBENR |= RCC_AHBENR_GPIOBEN; // Enable GPIOB clock
+
+  // Configure pins for SPI2 alternate function
+  GPIOB->MODER |= (0x02 << (13 * 2)) | (0x02 << (14 * 2)) | (0x02 << (15 * 2));
+  GPIOB->MODER |= (0x01 << (12 * 2)); // PB12 as output for CS
+  GPIOB->BSRR |= GPIO_BSRR_BS_12;     // Set CS high
+
+  RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; // Enable SPI2 clock
+  SPI2->CR1 = SPI_CR1_MSTR | SPI_CR1_BR_1 |
+              SPI_CR1_SPE; // Master mode, Baud rate = fPCLK / 16
+  SPI2->CR2 = SPI_CR2_FRXTH | SPI_CR2_DS_2 |
+              SPI_CR2_SSOE; // 8-bit Data frame, Slave Select enabled
+}
+
+// Implements a delay in microseconds
+static void spi_delay(uint32_t delay_in_us) {
+  volatile uint32_t counter = 0;
+  delay_in_us *= 3;
+  while (counter < delay_in_us) {
+    counter++;
+  }
+}
+
+// Function to check if EEPROM is busy
+static uint8_t is_eeprom_busy(void) {
+  uint8_t status;
+  GPIOB->BSRR = GPIO_BSRR_BR_12; // Pull CS low
+  spi_delay(1);
+  *((volatile uint8_t *)&SPI2->DR) = RDSR; // Send Read Status Register command
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+  status = SPI2->DR; // Read status register
+
+  // Dummy read to receive the actual status
+  *((volatile uint8_t *)&SPI2->DR) = 0xFF;
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+  status = SPI2->DR;
+
+  GPIOB->BSRR = GPIO_BSRR_BS_12; // Pull CS high
+  spi_delay(50);                 // Short delay
+
+  return (status & 0x01); // Return Write In Progress bit
+}
+
+// Modified write_to_address function
+static void write_to_address(uint16_t address, uint8_t Data) {
+  while (is_eeprom_busy())
+    ; // Wait for EEPROM to be ready
+
+  GPIOB->BSRR = GPIO_BSRR_BR_12; // Pull CS low
+  spi_delay(1);
+  *((volatile uint8_t *)&SPI2->DR) = WREN; // Send Write Enable command
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+
+  GPIOB->BSRR = GPIO_BSRR_BS_12; // Pull CS high
+  spi_delay(50);
+
+  // Add further steps for writing the address and Data...
+}
+
+// Read from EEPROM address
+static uint8_t read_from_address(uint16_t address) {
+  uint8_t Data;
+  GPIOB->BSRR = GPIO_BSRR_BR_12; // Pull CS low
+  spi_delay(1);
+  *((volatile uint8_t *)&SPI2->DR) = READ; // Send Read command
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+
+  // Send address (MSB first)
+  *((volatile uint8_t *)&SPI2->DR) = (address >> 8);
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+  *((volatile uint8_t *)&SPI2->DR) = (address & 0xFF);
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+
+  // Clock in Data
+  *((volatile uint8_t *)&SPI2->DR) = 0xFF; // Send dummy byte to receive Data
+  while (!(SPI2->SR & SPI_SR_RXNE))
+    ;
+  Data = SPI2->DR;
+
+  GPIOB->BSRR = GPIO_BSRR_BS_12; // Pull CS high
+  spi_delay(50);
+
+  return Data; // Return received Data
+}
+
+void CatchError(void) {
+  EEPROM_I = 0;
+  EEPROM_Val = StoredData[0];
+  sprintf(lcd_output, "%d", EEPROM_Val);
+  writeLCD(lcd_output);
+}
+
+void Error_Handler(void) {
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1) {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef USE_FULL_ASSERT
+void assert_failed(uint8_t *file, uint32_t line) {
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line
+     number, ex: printf("Wrong parameters value: file %s on line %d\r\n", file,
+     line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
